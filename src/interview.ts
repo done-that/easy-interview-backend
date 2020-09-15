@@ -13,6 +13,11 @@ interface ICodeChange {
   code: string;
 }
 
+interface ILanguageChange {
+  interviewId: string;
+  language: string;
+}
+
 /**
  * Here is where we should register event listeners and emitters. 
  */
@@ -28,16 +33,18 @@ export class Interview {
   private startInterviewSession() {
     interviewsInSession.push(this.socket);
 
-    this.socket.on("disconnect", this.onDisconnect.bind(this))
+    this.socket.on('disconnect', this.onDisconnect.bind(this))
 
     // Sends new move to the other socket session in the same room. 
-    this.socket.on("code updated", this.codeUpdated.bind(this))
+    this.socket.on('code updated', this.codeUpdated.bind(this))
+
+    this.socket.on('language selected', this.languageUpdated.bind(this))
 
     // User creates new game room after clicking 'submit' on the frontend
-    this.socket.on("create-interview", this.createNewInterview.bind(this))
+    this.socket.on('create-interview', this.createNewInterview.bind(this))
 
     // User joins gameRoom after going to a URL with '/game/:gameId' 
-    this.socket.on("join-interview", this.joinInterview.bind(this))
+    this.socket.on('join-interview', this.joinInterview.bind(this))
 
     this.socket.on('request username', this.requestUsername.bind(this))
 
@@ -49,11 +56,11 @@ export class Interview {
 
   private videoChatBackend() {
     // main function listeners
-    this.socket.on("callUser", (data) => {
+    this.socket.on('callUser', (data) => {
       this.io.to(data.userToCall).emit('hey', { signal: data.signalData, from: data.from });
     })
 
-    this.socket.on("acceptCall", (data) => {
+    this.socket.on('acceptCall', (data) => {
       this.io.to(data.to).emit('callAccepted', data.signal);
     })
   }
@@ -72,7 +79,7 @@ export class Interview {
 
     // If the room exists...
     if (room === undefined) {
-      sock.emit('status', "This game session does not exist.");
+      sock.emit('status', 'This game session does not exist.');
       return
     }
     if (room.length < 2) {
@@ -93,7 +100,7 @@ export class Interview {
 
     } else {
       // Otherwise, send an error message back to the player.
-      sock.emit('status', "There are already 2 people in this room.");
+      sock.emit('status', 'There are already 2 people in this room.');
     }
   }
 
@@ -117,6 +124,11 @@ export class Interview {
     const { interviewId } = change
 
     this.io.to(interviewId).emit('code updated', change);
+  }
+
+  languageUpdated(change: ILanguageChange) {
+    const { interviewId } = change
+    this.io.to(interviewId).emit('language selected', change.language);
   }
 
   onDisconnect() {
