@@ -22,9 +22,12 @@ interface ILanguageChange {
  * Here is where we should register event listeners and emitters. 
  */
 export class Interview {
-  io: Server;
-  socket: Socket;
-  constructor(sio: Server, socket: Socket) {
+  io!: Server;
+  socket!: Socket;
+  constructor() {
+  }
+
+  initialize(sio: Server, socket: Socket) {
     this.io = sio;
     this.socket = socket;
     this.startInterviewSession();
@@ -71,10 +74,10 @@ export class Interview {
      */
 
     // A reference to the player's Socket.IO socket object
-    const sock = this.socket
+    const sock = this.socket;
 
     // Look up the room ID in the Socket.IO manager object.
-    const room = this.io.sockets.adapter.rooms[idData.interviewId]
+    const room = this.io.sockets.adapter.rooms.get(idData.interviewId);
     // console.log(room)
 
     // If the room exists...
@@ -82,16 +85,16 @@ export class Interview {
       sock.emit('status', 'This game session does not exist.');
       return
     }
-    if (room.length < 2) {
+    if (room.size < 2) {
       // attach the socket id to the data object.
       idData.socketId = sock.id;
 
       // Join the room
       sock.join(idData.interviewId);
 
-      console.log(room.length)
+      console.log(room.size)
 
-      if (room.length === 2) {
+      if (room.size === 2) {
         this.io.sockets.in(idData.interviewId).emit('start interview', idData.username)
       }
 

@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import http from 'http';
-import socket from 'socket.io';
+import { Server } from 'socket.io';
 import { Interview } from './interview';
 
 dotenv.config();
@@ -19,12 +19,13 @@ app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = socket(server);
+const io = new Server(server);
+const interview = new Interview();
 
-io.on('connection', client => {
+io.on('connection', (socket) => {
   // gameLogic.initializeGame(io, client)
   console.log('connected');
-  new Interview(io, client);
+  interview.initialize(io, socket);
 });
 
 server.listen(PORT, () => {
