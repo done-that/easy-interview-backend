@@ -1,6 +1,5 @@
 import * as dotenv from 'dotenv';
 import express from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
 import http from 'http';
 import { Server } from 'socket.io';
@@ -12,18 +11,23 @@ if (!process.env.PORT) {
   process.exit(1);
 }
 
+const allowlist = ['http://localhost:3000', 'http://localhost:7000']
+
 const PORT: number = parseInt(process.env.PORT as string, 10);
 const app = express();
 app.use(helmet());
-app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: allowlist,
+    methods: ['GET', 'POST'],
+  },
+});
 const interview = new Interview();
 
 io.on('connection', (socket) => {
-  // gameLogic.initializeGame(io, client)
   console.log('connected');
   interview.initialize(io, socket);
 });

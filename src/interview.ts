@@ -8,6 +8,18 @@ interface IUserData {
   username: string;
 }
 
+type DataType = 'CODE' | 'LANGUAGE' | 'MESSAGE';
+
+interface IData {
+  type: DataType;
+  value?: string;
+}
+
+interface IPayLoad {
+  sessionId: string;
+  data: IData;
+}
+
 interface ICodeChange {
   interviewId: string;
   code: string;
@@ -17,6 +29,15 @@ interface ILanguageChange {
   interviewId: string;
   language: string;
 }
+
+// create new session (name)
+// join session (id, name)
+// send (id, data)
+// joined (name)
+// start call
+// accept call
+// leave session
+
 
 /**
  * Here is where we should register event listeners and emitters. 
